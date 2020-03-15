@@ -38,7 +38,7 @@ for index, entry in enumerate(os.scandir(lod_files_directory)):
         index_number = index + 1
         # Extract from regex the relevant parameters
         date = match.group(1)
-        time = match.group(3)
+        time = match.group(4)
         description = match.group(6)
 
         # Saving this just in case
@@ -148,5 +148,5 @@ for lod_file in lod_files:
         cells[1].text = word_date
     cells[2].text = f"{lod_file.description}"
 
-lod_doc.save('lod_docnew7.docx')
+lod_doc.save('lod_docnew8.docx')
 
