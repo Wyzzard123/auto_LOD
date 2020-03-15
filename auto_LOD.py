@@ -78,15 +78,75 @@ heading_cells[0].text = 'S/N'
 heading_cells[1].text = 'Date/Time'
 heading_cells[2].text = 'Description'
 
+# TODO - change this later
+# # Either "yyyy.mm.dd" or "day month year"
+# DATE_FORMAT = "day month year"
+
+# # Either "24h" or "12h"
+# TIME_FORMAT = "12h"
+
+LIST_OF_MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+]
 
 for lod_file in lod_files:
     cells = table.add_row().cells
     cells[0].text = f"{lod_file.index_number}."
+    # TODO - Need to change date to eg 26 January 2020 instead of 2020.01.26
+    yyyymmdd_date = lod_file.date
+
+    components_of_date = yyyymmdd_date.split(".")
+    year = int(components_of_date[0])
+    month = int(components_of_date[1])
+    day = int(components_of_date[2])
+
+    month_in_words = LIST_OF_MONTHS[month - 1]
+
+    word_date = str(day) + " " + month_in_words + " " + str(year)
+    # TODO - Need to change to 10.34pm instead of 22.34
     if lod_file.time is not None:
-        cells[1].text = f"{lod_file.date} {lod_file.time}"
+        time_24h = lod_file.time
+        components_of_time = time_24h.split(".")
+        hour = int(components_of_time[0])
+        
+        # Minute is not changed to int because it would otherwise show things like "10.0 pm"
+        minute = components_of_time[1]
+        am_or_pm = ""
+        if hour < 12:
+            am_or_pm = "am"
+            if hour != 0:
+                hour_12h = hour
+            elif hour == 0:
+                hour_12h = 12
+            
+        elif int(hour) >= 12:
+            am_or_pm = "pm"
+            if hour != 12:
+                hour_12h = hour - 12
+            elif hour == 12:
+                hour_12h = hour
+        
+        time_12h = f"{hour_12h}.{minute}{am_or_pm}"
+
+    if lod_file.time is not None:
+    #     cells[1].text = f"{lod_file.date} {lod_file.time}"
+        cells[1].text = f"{word_date}\n{time_12h}"
+        
     elif lod_file.time is None:
-        cells[1].text = lod_file.date
+    #     cells[1].text = lod_file.date
+        cells[1].text = word_date
     cells[2].text = f"{lod_file.description}"
 
-lod_doc.save('lod_doc.docx')
+lod_doc.save('lod_docnew7.docx')
 
