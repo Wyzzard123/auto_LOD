@@ -9,8 +9,16 @@ import re
 
 wdFormatPDF = 17
 
+# CHANGE THIS
+# Folder with the word docs
 IN_FOLDER = ("test_files")
+
+# CHANGE THIS
+# Folder to save the PDF docs to
 OUT_FOLDER = ("pdfs")
+
+# This code assumes that this python file is in the parent folder of the 
+# IN_FOLDER and OUT_FOLDER
 BASE_DIR = os.getcwd()
 
 # Set this to True if you want to overwrite any already existing PDFs.
