@@ -1,4 +1,9 @@
 *env
 .vscode
-*docx
+*.docx
 .idea
+*.doc
+*.pdf
+
+!test_files/*
+!Sample Automatic LOD.docx
