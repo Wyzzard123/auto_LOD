@@ -20,9 +20,11 @@ lod_files = []
 LOD_File = namedtuple('LOD_File', 'index_number date time description extension') 
 invalid_names = []
 
-# CHANGE THIS
-lod_files_directory = './test_files'
 file_name_pattern = r'^([0-9]{4}\.[0-9]{2}\.[0-9]{2})( )(([0-2][0-4]\.[0-5][0-9])( ))?(.+)((\.)(.+))$'
+
+# CHANGE THESE TWO VARIABLES
+lod_files_directory = './test_files'
+word_doc_file_name = 'lod_docnew9.docx'
 
 # TODO - Sort differently. Currently follows folder sorting structure, which is by date, then time then alphabetical order. If there is no timestamp while other files have a timestamp on the same date, the file with no timestamp will appear at the end.
 for index, entry in enumerate(os.scandir(lod_files_directory)):
@@ -148,5 +150,5 @@ for lod_file in lod_files:
         cells[1].text = word_date
     cells[2].text = f"{lod_file.description}"
 
-lod_doc.save('lod_docnew8.docx')
+lod_doc.save(word_doc_file_name)
 
