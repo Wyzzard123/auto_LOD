@@ -15,7 +15,8 @@ import docx
 import os
 import re
 from collections import namedtuple
-# import argparse
+import argparse
+import sys
 
 lod_files = []
 LOD_File = namedtuple('LOD_File', 'index_number date time description extension') 
@@ -26,33 +27,79 @@ invalid_names = []
 # Eg 2020.05.22 abcd.docx
 file_name_pattern = r'^([0-9]{4}\.[0-9]{2}\.[0-9]{2})( )(([0-2][0-4]\.[0-5][0-9])( ))?(.+)((\.)(.+))$'
 
-# CHANGE THESE TWO VARIABLES
+parser = argparse.ArgumentParser(description="Create a LOD file.\n"
+                                             "Example: python auto_LOD.py -d ./test_files -n 'New Document.docx'")
 
 # This is the folder where all your named files are located. You can set this to an absolute path.
-lod_files_directory = './test_files'
-# This is the name of the output file.
-# You can also change this to an absolute directory path
-word_doc_file_name = 'new_LOD.docx'
+parser.add_argument('-d', '--directory', metavar='file_directory', type=str,
+                    help='A file directory containing all the documents to be listed. Pass in an absolute or relative '
+                         'path to the directory.',
+                    default='./test_files')
 
+# This is the output file (a .docx or .doc). You can also change this to an absolute directory path
+parser.add_argument('-n', '--name', metavar='file_name',
+                    type=str,
+                    help='A file name or file path for the LOD file.',
+                    default='New LOD.docx')
 
-# TODO - Use argparse
-# parser = argparse.ArgumentParser(description="Create a LOD file.")
-# parser.add_argument('file directory', metavar='file_directory', type=str, help='A file directory to save the new file.', default='./pdf_files')
-# parser.add_argument('file name', metavar='file_name', type=str, help='A file name or file path for the LOD file.', default='new_LOD.docx')
-# print(parser.parse_args())
+args = parser.parse_args()
 
-if not word_doc_file_name.endswith('.docx'):
+lod_files_directory = args.directory
+word_doc_file_name = args.name
+
+if not os.path.isdir(lod_files_directory):
+    sys.exit(f"ERROR: Directory '{lod_files_directory}' does not exist. Check the file path for any errors.")
+
+# If the word doc file name is on a filepath that does not exist, create the intermediate files
+word_doc_file_path_components = os.path.split(word_doc_file_name)
+if len(word_doc_file_path_components) >= 2:
+    if not os.path.isdir(os.path.join(*word_doc_file_path_components[:-1])):
+        os.makedirs(os.path.join(*word_doc_file_path_components[:-1]))
+        print(f"Created intermediate directories {word_doc_file_name}...")
+
+if not word_doc_file_name.endswith('.docx') and not word_doc_file_name.endswith('.doc'):
+    while os.path.isfile(word_doc_file_name + ".docx"):
+        # Add a 1 to the end of the file name if the file already exists.
+        print(f"File {word_doc_file_name} already exists.")
+        word_doc_file_name += "1"
+        print(f"Output file renamed to {word_doc_file_name}")
+
     # If word doc file name does not have .docx at the end, add it.
     word_doc_file_name += ".docx"
+    print(f"Adding .docx to Word Document file name. File name changed to {word_doc_file_name}")
 
-# TODO - Sort differently. Currently follows folder sorting structure, which is by date, then time then alphabetical order. If there is no timestamp while other files have a timestamp on the same date, the file with no timestamp will appear at the end.
+else:
+    # Add a 1 to the end of the file name if the file already exists.
+    while os.path.isfile(word_doc_file_name):
+        print(f"{word_doc_file_name} already exists.")
+        file_name_extractor_pattern = r'^(.*)\.(doc|docx)$'
+        word_doc_file_name_before_extension = re.match(file_name_extractor_pattern, word_doc_file_name)[1]
+        word_doc_file_name_extension = re.match(file_name_extractor_pattern, word_doc_file_name)[2]
+        word_doc_file_name = word_doc_file_name_before_extension + "1" + "." + word_doc_file_name_extension
+        print(f"Output File renamed to {word_doc_file_name}")
+
+def continue_or_abort(prompt="Continue (Y) or Abort (N)?", abort_message="Aborted. Rename Files"):
+    """
+    Raise an exception if the user does not choose to continue after encountering an invalid file name.
+    """
+    continue_ = input(prompt)
+    if continue_.lower() == 'abort':
+        raise Exception(abort_message)
+    elif continue_.lower().startswith('y') or continue_.lower() == 'continue':
+        return
+    else:
+        raise Exception(abort_message)
+
 for index, entry in enumerate(os.scandir(lod_files_directory)):
     file_name = entry.name
     match = re.match(file_name_pattern, file_name)
 
     # If there is no regex name, prompt to rename the file and continue the loop
     if not match:
-        invalid_names.append(entry.name)
+        invalid_names.append(file_name)
+        # If user chooses to break, an error will be raised. Otherwise, continue.
+        continue_or_abort(prompt=f"Invalid file name {file_name} (does not follow pattern). Continue (Y) or abort (N)? ",
+                          abort_message="Aborted. Rename files.")
         continue
     # Else, add each group to a tuple of format date, time, name
     elif match:
@@ -75,13 +122,15 @@ if invalid_names:
     print("Rename the following files:")
     for invalid_name in invalid_names:
         print(invalid_name)
+    continue_or_abort(prompt=f"Skip these files and continue (Y) or abort (N)? ",
+                      abort_message="Aborted. Rename files.")
 
-        
-    
-    lod_files.append(entry.name)
+# Print file names to console
+print(f"\nCreating LOD file from {os.path.abspath(lod_files_directory)} at {os.path.abspath(word_doc_file_name)}, "
+      f"containing the following files:\n")
 
-
-print(lod_files)
+for lod_file in lod_files:
+    print(f"{lod_file.index_number} | {lod_file.date}{' ' + lod_file.time if lod_file.time else ''} | {lod_file.description}")
 
 # Create a new  Microsoft Word document
 lod_doc = docx.Document()
@@ -90,7 +139,7 @@ lod_doc = docx.Document()
 table = lod_doc.add_table(1, 3)
 
 # Make sure there are borders
-table.style = 'TableGrid'
+table.style = 'Table Grid'
 
 # Populate header row
 
@@ -169,5 +218,12 @@ for lod_file in lod_files:
         cells[1].text = word_date
     cells[2].text = f"{lod_file.description}"
 
-lod_doc.save(word_doc_file_name)
-
+try:
+    lod_doc.save(word_doc_file_name)
+except Exception as e:
+    print(f"{type(e)}: {e}")
+    print("Failed to save new LOD.")
+else:
+    print(f"\nSuccessfully saved new list of documents\n"
+          f"Folder Used: '{os.path.abspath(lod_files_directory)}'\n"
+          f"Output File Path: '{os.path.abspath(word_doc_file_name)}'")
