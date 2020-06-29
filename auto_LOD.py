@@ -78,6 +78,7 @@ else:
         word_doc_file_name = word_doc_file_name_before_extension + "1" + "." + word_doc_file_name_extension
         print(f"Output File renamed to {word_doc_file_name}")
 
+
 def continue_or_abort(prompt="Continue (Y) or Abort (N)?", abort_message="Aborted. Rename Files"):
     """
     Raise an exception if the user does not choose to continue after encountering an invalid file name.
@@ -89,6 +90,7 @@ def continue_or_abort(prompt="Continue (Y) or Abort (N)?", abort_message="Aborte
         return
     else:
         raise Exception(abort_message)
+
 
 for index, entry in enumerate(os.scandir(lod_files_directory)):
     file_name = entry.name
