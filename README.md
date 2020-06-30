@@ -62,6 +62,16 @@ will be set to 'test_files' and 'New LOD.docx' respectively.
    
    __NOTE__: You generally cannot click to navigate in a terminal window, and will have to use the arrow keys to move back and forth and delete text.
    
+   __EXAMPLE__:
+   * To immediately see how this works, use the test_files directory included in this auto_LOD folder. 
+   * Make sure you are in the auto_LOD folder and type the following command:
+       ``` 
+      python auto_LOD.py -d './test_files' -n 'Test LOD.docx' 
+     ```
+     You will now have a file called Test LOD.docx in the auto_LOD folder. 
+     
+     __NOTE__: './' simply means the current directory. Likewise '../', means the parent directory.
+   
 8. If there are any files which do not follow the required naming pattern, you will be prompted to Continue/Skip the invalidly named files (Y) or Abort/Exit (N). 
     * Type 'y' to continue and 'n' to abort then press enter. 
     * At the very end, you will be prompted one more time and presented with a list of failed names. 
