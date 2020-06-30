@@ -53,8 +53,12 @@ if not os.path.isdir(lod_files_directory):
 # If the word doc file name is on a filepath that does not exist, create the intermediate files
 word_doc_file_path_components = os.path.split(word_doc_file_name)
 if len(word_doc_file_path_components) >= 2:
-    if not os.path.isdir(os.path.join(*word_doc_file_path_components[:-1])):
-        os.makedirs(os.path.join(*word_doc_file_path_components[:-1]))
+    intermediate_folder_path = os.path.join(*word_doc_file_path_components[:-1])
+
+    # Checks that intermediate folder path is not an empty path like ''. If it is not '' and there is no directory,
+    # Create intermediate directories.
+    if intermediate_folder_path and not os.path.isdir(intermediate_folder_path):
+        os.makedirs(os.path.join(*intermediate_folder_path))
         print(f"Created intermediate directories {word_doc_file_name}...")
 
 if not word_doc_file_name.endswith('.docx') and not word_doc_file_name.endswith('.doc'):
@@ -100,7 +104,7 @@ for index, entry in enumerate(os.scandir(lod_files_directory)):
     if not match:
         invalid_names.append(file_name)
         # If user chooses to break, an error will be raised. Otherwise, continue.
-        continue_or_abort(prompt=f"Invalid file name {file_name} (does not follow pattern). Continue (Y) or abort (N)? ",
+        continue_or_abort(prompt=f"Invalid file name {file_name} (does not follow pattern). Continue [Y/N]? ",
                           abort_message="Aborted. Rename files.")
         continue
     # Else, add each group to a tuple of format date, time, name
@@ -124,7 +128,7 @@ if invalid_names:
     print("Rename the following files:")
     for invalid_name in invalid_names:
         print(invalid_name)
-    continue_or_abort(prompt=f"Skip these files and continue (Y) or abort (N)? ",
+    continue_or_abort(prompt=f"Skip these files and continue [Y/N]? ",
                       abort_message="Aborted. Rename files.")
 
 # Print file names to console
@@ -149,13 +153,6 @@ heading_cells = table.rows[0].cells
 heading_cells[0].text = 'S/N'
 heading_cells[1].text = 'Date/Time'
 heading_cells[2].text = 'Description'
-
-# TODO - change this later
-# # Either "yyyy.mm.dd" or "day month year"
-# DATE_FORMAT = "day month year"
-
-# # Either "24h" or "12h"
-# TIME_FORMAT = "12h"
 
 LIST_OF_MONTHS = [
     "January",
