@@ -71,6 +71,12 @@ will be set to 'test_files' and 'New LOD.docx' respectively.
 
 9. You should now have an automatically made List of Documents with the filename/at the file path that you provided.
 
+10. To get updates and make sure you have the latest version, type the following into the terminal while in the auto_LOD folder:
+
+    ``` 
+    git pull origin master
+    ```
+
 ## NOTES
 
 1. If the folder provided in the directory_name argument does not exist, the program will exit.
