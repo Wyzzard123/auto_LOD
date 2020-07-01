@@ -12,6 +12,11 @@ The table will have three columns:
 # TODO - Regex filter to capture the names of each
 
 import docx
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
+
 import os
 import re
 from collections import namedtuple
@@ -141,6 +146,10 @@ for lod_file in lod_files:
 # Create a new  Microsoft Word document
 lod_doc = docx.Document()
 
+normal_style = lod_doc.styles['Normal']
+normal_style.font.name = 'Times New Roman'
+normal_style.font.size = docx.shared.Pt(12)
+
 # Create a table with just headers first. Add rows as we iterate through loop.
 table = lod_doc.add_table(1, 3)
 
@@ -153,6 +162,22 @@ heading_cells = table.rows[0].cells
 heading_cells[0].text = 'S/N'
 heading_cells[1].text = 'Date/Time'
 heading_cells[2].text = 'Description'
+
+
+for heading_cell in heading_cells:
+    # Set a cell background (shading) color to RGB D9D9D9.
+
+    # You must repeat this because if you set shading_elm before the loop, XML will simply move the shading_elm
+    # element to the next cell and only the last cell will be coloured.
+    # See https://stackoverflow.com/questions/50741377/python-docx-setting-background-color-table-cell
+
+    shading_elm = parse_xml(r'<w:shd {} w:fill="D9D9D9"/>'.format(nsdecls('w')))
+    heading_cell._tc.get_or_add_tcPr().append(shading_elm)
+
+    # Set heading cells to bold
+    # https://stackoverflow.com/questions/37757203/making-cells-bold-in-a-table-using-python-docx
+    heading_cell.paragraphs[0].runs[0].font.bold = True
+
 
 LIST_OF_MONTHS = [
     "January",
@@ -216,6 +241,25 @@ for lod_file in lod_files:
     elif lod_file.time is None:
         cells[1].text = word_date
     cells[2].text = f"{lod_file.description}"
+
+# Make all rows have a fixed height of 1.1 cm to allow text not to be cut off.
+for row in table.rows:
+    row.height = docx.shared.Cm(1.1)
+
+def set_repeat_table_header(row):
+    """
+    Set repeat table row on every new page
+    See https://github.com/python-openxml/python-docx/issues/322
+    """
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+    tblHeader = OxmlElement('w:tblHeader')
+    tblHeader.set(qn('w:val'), "true")
+    trPr.append(tblHeader)
+    return row
+
+# Repeat table header.
+set_repeat_table_header(table.rows[0])
 
 try:
     lod_doc.save(word_doc_file_name)

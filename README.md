@@ -96,5 +96,9 @@ will be set to 'test_files' and 'New LOD.docx' respectively.
 1. If you wish to categorize the List of Documents by means other than date, you can put the documents into different folders and run the script on each folder, then compile the results together.
 
 1. You will have to provide your own formatting.
+    
+    __UPDATE (1 July 2020)__: Some basic styling has been added. The word document is now in Times New Roman with a fixed table height. The first row has a grey background and is bolded, and the table headers repeat.
+    
+    Make sure to do a git pull to update to the latest version. The Sample Automatic LOD.docx has also been updated. 
 
 1. IMPORTANT: The author of the document will be listed as python-docx. Change this on your own.
